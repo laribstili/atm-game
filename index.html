@@ -1,0 +1,366 @@
+<!-- Complete index.html
+
+NOTE:
+Replace your current index.html with this file.
+
+Files expected in the same folder:
+
+index.html
+background.gif
+
+sound1.mp3
+sound2.mp3
+sound3.mp3
+sound4.mp3
+sound5.mp3
+
+special.mp3
+
+-->
+
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+
+<link rel="manifest" href="manifest.json">
+<meta name="theme-color" content="#000000">
+
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<title>Ass To Mouth Game</title>
+
+<style>
+
+body{
+    margin:0;
+    height:100vh;
+    display:flex;
+    justify-content:center;
+    align-items:center;
+    font-family:Arial,sans-serif;
+
+    background:url("background.gif") center center no-repeat;
+    background-size:cover;
+}
+
+.panel{
+
+    background:rgba(0,0,0,.45);
+
+    padding:40px;
+
+    border-radius:20px;
+
+    text-align:center;
+
+    color:white;
+
+    backdrop-filter:blur(4px);
+
+}
+
+button{
+
+    font-size:22px;
+
+    padding:14px 40px;
+
+    cursor:pointer;
+
+    border:none;
+
+    border-radius:10px;
+
+}
+
+#status{
+
+    margin-top:20px;
+
+    font-size:20px;
+
+}
+
+</style>
+
+</head>
+
+<body>
+
+<div class="panel">
+
+<h1>Ass To Mouth Game</h1>
+
+<button id="toggle">Start</button>
+
+<div id="status">Stopped</div>
+
+</div>
+
+<script>
+
+
+//=================================================
+// SETTINGS
+//=================================================
+
+const RANDOM_MIN = 10;
+const RANDOM_MAX = 30;
+
+const FIXED_INTERVAL = 10;
+
+const SPECIAL_EVERY = 8;
+
+const SPECIAL_DELAY = 40;
+
+const SHOW_CLOCK = true;
+
+
+// Sounds played after RANDOM interval
+
+const RANDOM_SOUNDS = [
+
+"sound1.mp3",
+"sound2.mp3"
+
+];
+
+
+// Sounds played after FIXED interval
+
+const FIXED_SOUNDS = [
+
+"sound3.mp3",
+"sound4.mp3",
+"sound5.mp3"
+
+];
+
+
+// Special checkpoint sound
+
+const SPECIAL_SOUND = "special.mp3";
+
+
+//=================================================
+
+
+
+let running=false;
+
+let timeoutId=null;
+
+let randomNext=true;
+
+let beepCount=0;
+
+
+
+const button=document.getElementById("toggle");
+
+const status=document.getElementById("status");
+
+
+
+if(!SHOW_CLOCK){
+
+    status.style.display="none";
+
+}
+
+
+
+function playSound(file){
+
+    const audio=new Audio(file);
+
+    audio.volume=.5;
+
+    audio.play();
+
+}
+
+
+
+function playNormalSound(){
+
+    let list=randomNext ? RANDOM_SOUNDS : FIXED_SOUNDS;
+
+    const file=list[Math.floor(Math.random()*list.length)];
+
+    playSound(file);
+
+}
+
+
+
+function scheduleBeep(){
+
+    if(!running)return;
+
+
+
+    let delay;
+
+
+
+    // Every 8 normal beeps play special immediately,
+// then wait before continuing.
+
+if (beepCount >= SPECIAL_EVERY) {
+
+    playSound(SPECIAL_SOUND);
+
+    beepCount = 0;
+
+    if (SHOW_CLOCK) {
+
+        status.textContent =
+        "Next sound in " +
+        SPECIAL_DELAY +
+        " seconds";
+
+    }
+
+    timeoutId = setTimeout(() => {
+
+        if (!running) return;
+
+        scheduleBeep();
+
+    }, SPECIAL_DELAY * 1000);
+
+    return;
+
+}
+
+
+
+    if(randomNext){
+
+        delay=
+        (RANDOM_MIN+
+        Math.random()*(RANDOM_MAX-RANDOM_MIN))
+        *1000;
+
+    }else{
+
+        delay=FIXED_INTERVAL*1000;
+
+    }
+
+
+
+    if(SHOW_CLOCK){
+
+        status.textContent=
+        "Next sound in "+
+        (delay/1000).toFixed(1)+
+        " seconds";
+
+    }
+
+
+
+    timeoutId=setTimeout(()=>{
+
+        if(!running)return;
+
+        // Is the next beep the special checkpoint?
+if (beepCount + 1 >= SPECIAL_EVERY) {
+
+    playSound(SPECIAL_SOUND);
+
+    beepCount = 0;
+
+    if (SHOW_CLOCK) {
+        status.textContent =
+            "Next sound in " +
+            SPECIAL_DELAY +
+            " seconds";
+    }
+
+    timeoutId = setTimeout(() => {
+
+        if (!running) return;
+
+        randomNext = true; // restart with random interval
+
+        scheduleBeep();
+
+    }, SPECIAL_DELAY * 1000);
+
+    return;
+}
+
+
+// Otherwise play a normal sound
+playNormalSound();
+
+beepCount++;
+
+randomNext = !randomNext;
+
+scheduleBeep();
+
+    },delay);
+
+}
+
+
+
+button.onclick=()=>{
+
+    running=!running;
+
+
+
+    if(running){
+
+        button.textContent="Stop";
+
+        scheduleBeep();
+
+    }else{
+
+        button.textContent="Start";
+
+        clearTimeout(timeoutId);
+
+        beepCount=0;
+
+        randomNext=true;
+
+        if(SHOW_CLOCK){
+
+            status.textContent="Stopped";
+
+        }
+
+    }
+
+};
+
+</script>
+
+<script>
+
+if ("serviceWorker" in navigator) {
+
+    window.addEventListener("load", () => {
+
+        navigator.serviceWorker.register("service-worker.js")
+            .then(() => console.log("Service Worker registered"))
+            .catch(err => console.error("Service Worker failed:", err));
+
+    });
+
+}
+
+</script>
+
+</body>
+</html>
+```

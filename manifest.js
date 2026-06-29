@@ -1,0 +1,17 @@
+{
+  "name": "Random Sound Timer",
+  "short_name": "Sound Timer",
+  "description": "Random interval training timer",
+  "start_url": "./index.html",
+  "display": "standalone",
+  "background_color": "#000000",
+  "theme_color": "#000000",
+  "orientation": "portrait",
+  "icons": [
+    {
+      "src": "icon.png",
+      "sizes": "512x512",
+      "type": "image/png"
+    }
+  ]
+}
