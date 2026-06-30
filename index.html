@@ -172,13 +172,37 @@ if(!SHOW_CLOCK){
 
 
 
+// Preload all sounds
+
+const audioCache = {};
+
+[
+    ...RANDOM_SOUNDS,
+    ...FIXED_SOUNDS,
+    SPECIAL_SOUND
+].forEach(file => {
+
+    const audio = new Audio(file);
+
+    audio.preload = "auto";
+
+    audio.load();
+
+    audioCache[file] = audio;
+
+});
+
+
+
 function playSound(file){
 
-    const audio=new Audio(file);
+    const audio = audioCache[file];
 
-    audio.volume=.5;
+    audio.pause();
 
-    audio.play();
+    audio.currentTime = 0;
+
+    audio.play().catch(err => console.log(err));
 
 }
 
@@ -314,6 +338,22 @@ scheduleBeep();
 button.onclick=()=>{
 
     running=!running;
+
+// Unlock audio on iPhone
+
+Object.values(audioCache).forEach(audio => {
+
+    audio.play()
+        .then(() => {
+
+            audio.pause();
+
+            audio.currentTime = 0;
+
+        })
+        .catch(() => {});
+
+});
 
 
 
